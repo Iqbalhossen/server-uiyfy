@@ -1,0 +1,133 @@
+const schedule = require('node-schedule');
+const TradeLogModels = require('../../models/TradeLog/TradeLogModels');
+const WebSocket = require('ws');
+const { ObjectId } = require('mongodb');
+// ${TradeData?.Symbol}
+schedule.scheduleJob("*/01 * * * * *", function () {
+  const TradeLogCron = async () => {
+
+    try {
+    const url = "https://api.exchange.coinbase.com/products/BTC-USD/trades";
+
+      const apiCall = async () => {
+        await fetch(url  )
+          .then((res) => res.json())
+          .then((data) => 
+          console.log(data[0].price)
+          );
+      };
+
+      apiCall();
+
+  
+      // let demo = null;
+
+      // function start() {
+      //   let ws_coinbase = new WebSocket("wss://ws-feed.pro.coinbase.com");
+      //   ws_coinbase.onopen = function () {
+      //     ws_coinbase.send(
+      //       JSON.stringify({
+      //         type: "subscribe",
+      //         channels: [{
+      //           name: "ticker",
+      //           product_ids: [`BTC-USD`]
+      //         }]
+      //       })
+      //     );
+      //   };
+
+      //   ws_coinbase.onmessage = function incoming (event) {
+      //     let current_price_coinbase = JSON.parse(event.data);
+      //     if (current_price_coinbase.type === 'ticker') {
+      //       demo = parseFloat(current_price_coinbase?.price).toFixed(2);
+      //     }
+      //   };
+
+      //   ws_coinbase.onclose = (e) => {
+      //     // console.log(e);
+      //   };
+      // }
+      // start();
+
+
+
+
+      // const cronTime = new Date().toISOString().
+      //   replace(/T/, ' ').
+      //   replace(/\..+/, '');
+      // const data = await TradeLogModels.find({ OutTime: cronTime });
+      // // console.log(`running a task every 1 second ${cronTime}`)
+
+      // for (const TradeData of data) {
+
+      //   getData = async (data) => {
+      //     // const data = await TradeLogModels.findOne({  _id: new ObjectId(old_id) });
+      //     // console.log(TradeData)
+      //     const query = { _id: new ObjectId(TradeData._id) };
+      //     const option = { upsert: true };
+      //     if (TradeData.HighLow === 'low') {
+      //       if (data === TradeData.Crypto_price) {
+      //         console.log('draw')
+      //       }
+      //       if (data < TradeData.Crypto_price) {
+      //         console.log('win')
+      //       }
+      //       if (data > TradeData.Crypto_price) {
+      //         console.log('lose')
+      //       }
+
+      //     }
+
+      //     if (TradeData) {
+      //       console.log(data)
+      //     }
+
+
+      //     // const storeData = {  }
+      //     // const results = await CryptoCurrencyModels.findByIdAndUpdate(query, storeData, option);
+      //     // res.status(201).json({
+      //     //     success: true,
+      //     //     message: "Crypto Currency Update successfully",
+      //     //     data: results,
+      //     // });
+
+      //   }
+      //   function start() {
+      //     let ws_coinbase = new WebSocket("wss://ws-feed.pro.coinbase.com");
+      //     ws_coinbase.onopen = function () {
+      //       ws_coinbase.send(
+      //         JSON.stringify({
+      //           type: "subscribe",
+      //           channels: [{
+      //             name: "ticker",
+      //             product_ids: [`${TradeData?.Symbol}-USD`]
+      //           }]
+      //         })
+      //       );
+      //     };
+
+      //     ws_coinbase.onmessage = function incoming (event) {
+      //       let current_price_coinbase = JSON.parse(event.data);
+      //       if (current_price_coinbase.type === 'ticker') {
+      //         getData(parseFloat(current_price_coinbase?.price).toFixed(2))
+      //       }
+      //     };
+
+      //     ws_coinbase.onclose = (e) => {
+      //       // console.log(e);
+      //     };
+
+      //   }
+      //   start();
+
+      // }
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  TradeLogCron().catch(error => console.log(error));
+
+});
+
+
