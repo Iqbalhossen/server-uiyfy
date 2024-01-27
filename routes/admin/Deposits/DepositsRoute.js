@@ -12,6 +12,6 @@ route.put('/reject/:id',  AdminDepositRejectUpdate);
 route.get('/sum',  AdminDepositRejectsum);
 route.get('/single/:id',  AdminDepositSingleView);
 route.get('/history/view/:id',  AdminDepositDepositHistoryView);
-
+ 
 
 module.exports = route;

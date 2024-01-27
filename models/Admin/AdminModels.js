@@ -17,19 +17,26 @@ var AdminSchema = new mongoose.Schema({
     },
     picture:{
         type:String,
+        default:null,
     },
     is_verified:{
         type:Boolean,
     },
     status:{
         type:Number,
+        default:1,
     },
     password:{
         type:String,
         required:true,
     },
+    role:{
+        type:String,
+        default:null,
+    },
     EditororViewer:{
-        type:Number,
+        type:String,
+        default:"viewer",
     },
     KYC_setting:{
         type:Boolean,

@@ -1,13 +1,15 @@
 const schedule = require('node-schedule');
 const TradeLogModels = require('../../models/TradeLog/TradeLogModels');
 const { ObjectId } = require('mongodb');
-// ${TradeData?.Symbol}
+const { TransactionsTradeLogResults } = require('../Transactions/Transactions')
+// ${TradeData?.Symbol} 
 schedule.scheduleJob("*/01 * * * * *", function () {
+  
   const TradeLogCron = async () => {
 
     try {
 
-      const cronTime = new Date().toISOString().
+      const cronTime = new Date().toLocaleString().
         replace(/T/, ' ').
         replace(/\..+/, '');
       const data = await TradeLogModels.find({ OutTime: cronTime });
@@ -36,6 +38,7 @@ schedule.scheduleJob("*/01 * * * * *", function () {
                     Status: 1,
                   }
 
+                  TransactionsTradeLogResults(TradeData, userAmount, 'Draw');
                   await TradeLogModels.findByIdAndUpdate(query, storeData, option);
 
                 }
@@ -51,6 +54,7 @@ schedule.scheduleJob("*/01 * * * * *", function () {
                     Status: 1,
                   }
 
+                  TransactionsTradeLogResults(TradeData, amount, 'Win');
                   await TradeLogModels.findByIdAndUpdate(query, storeData, option);
 
                 }
@@ -65,6 +69,8 @@ schedule.scheduleJob("*/01 * * * * *", function () {
                     Result: 'Win',
                     Status: 1,
                   }
+
+                  TransactionsTradeLogResults(TradeData, amount, 'Win');
 
                   await TradeLogModels.findByIdAndUpdate(query, storeData, option);
 

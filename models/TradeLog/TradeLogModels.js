@@ -1,6 +1,10 @@
 const mongoose = require('mongoose'); 
 
 var TradeLogSchema = new mongoose.Schema({
+    user_name:{
+        type:String,
+         
+    },
     user_id:{
         type:String,
          

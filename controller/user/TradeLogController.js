@@ -1,8 +1,8 @@
-const CryptoCurrencyModels = require('../../models/CryptoCurrency/CryptoCurrencyModels');
 const ThradeSettingModels = require('../../models/ThradeSetting/ThradeSettingModel');
 const TradeLogModels = require('../../models/TradeLog/TradeLogModels');
-const DepositModels = require('../../models/Deposit/DepositModels');
-
+const userModels = require('../../models/userModels');
+const WithdrawalModels = require('../../models/Withdrawal/WithdrawalModels');
+const { TransactionsTradeLog } = require('../../commonfile/Transactions/Transactions')
 const { ObjectId } = require('mongodb');
 // Home Bouns Store section 
 const TradeLogStore = async (req, res) => {
@@ -10,59 +10,23 @@ const TradeLogStore = async (req, res) => {
         const data = req.body;
         const thradeSettingData = await ThradeSettingModels.findOne({ _id: new ObjectId(data.thradeSetting_id) });
 
-        /// Available Balance data
-        const DepositBalanceArraySum = await DepositModels.aggregate([
-            { $match: { Status: 1, user_id: data.user_id } },
-            { $group: { _id: {}, sum: { $sum: "$Amount" } } }
+         const WithdrawalBalanceArraySum = await WithdrawalModels.aggregate([
+            { $match: { user_id: data.user_id, Status: '0' } },
+            { $group: { _id: {}, sum: { $sum: "$AmountWithVat" } } }
         ]);
 
-        const TradeLogWinBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: 'Win' } },
-            { $group: { _id: {}, sum: { $sum: "$Result_Amount" } } }
-        ]);
+        const WithdrawalBalanceSum = parseFloat(`${WithdrawalBalanceArraySum[0] ? WithdrawalBalanceArraySum[0].sum : 0}`);
 
-        const TradeLogDrawBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: 'Draw' } },
-            { $group: { _id: {}, sum: { $sum: "$Result_Amount" } } }
-        ]);
+        const UserData = await userModels.findOne({ _id: new ObjectId(data.user_id) });
 
-
-        const DepositBalanceSum = parseFloat(`${DepositBalanceArraySum[0] ? DepositBalanceArraySum[0].sum : 0}`);
-        const TradeLogWinBalanceSum = parseFloat(`${TradeLogWinBalanceArraySum[0] ? TradeLogWinBalanceArraySum[0].sum : 0}`);
-        const TradeLogDrawBalanceSum = parseFloat(`${TradeLogDrawBalanceArraySum[0] ? TradeLogDrawBalanceArraySum[0].sum : 0}`);
-
-
-        /// Minus Balance data 
-        const TradeLogLossBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: 'Loss' } },
-            { $group: { _id: {}, sum: { $sum: "$Amount" } } }
-        ]);
-        
-        const TradeLogBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: null } },
-            { $group: { _id: {}, sum: { $sum: "$Amount" } } }
-        ]);
-
-        const TradeLogLossBalanceSum = parseFloat(`${TradeLogLossBalanceArraySum[0] ? TradeLogLossBalanceArraySum[0].sum : 0}`);
-        const TradeLogBalanceSum = parseFloat(`${TradeLogBalanceArraySum[0] ? TradeLogBalanceArraySum[0].sum : 0}`);
-
-        /// Available Balance
-        const AvailableBalanceSum = DepositBalanceSum + TradeLogWinBalanceSum + TradeLogDrawBalanceSum;
-
-        /// Minus Balance
-        const MinusBalenceSum = TradeLogBalanceSum + TradeLogLossBalanceSum + parseFloat(data?.amount);
-
-        /// Reming Available Balance
-        const RemingBalanceSum = AvailableBalanceSum - MinusBalenceSum;
-
+        const RemingBalanceSum = (parseFloat(UserData?.balance) - parseFloat(data?.amount) - parseFloat(WithdrawalBalanceSum));
 
         if (RemingBalanceSum >= 0) {
 
             const timeObject = new Date();
-            // timeObject = new Date(timeObject.getTime() + 1000 * 10);
-            // console.log(timeObject);
             const storeData = {
-                user_id: data.user_id,
+                user_name: UserData.name,
+                user_id: UserData._id,
                 Crypto: data?.CryptoCurrency?.Symbol,
                 Crypto_price: data?.Crypto_price,
                 Amount: data?.amount,
@@ -71,7 +35,7 @@ const TradeLogStore = async (req, res) => {
                 HighLow: data?.HighLow,
                 Result: null,
                 Status: 0,
-                OutTime: new Date(timeObject.getTime() + 1000 * thradeSettingData?.Time).toISOString().
+                OutTime: new Date(timeObject.getTime() + 1000 * thradeSettingData?.Time).toLocaleString().
                     replace(/T/, ' ').
                     replace(/\..+/, ''),
                 Symbol: data?.CryptoCurrency?.Symbol,
@@ -81,6 +45,7 @@ const TradeLogStore = async (req, res) => {
 
             }
 
+            TransactionsTradeLog(RemingBalanceSum, storeData, UserData);
 
             await TradeLogModels.create(storeData);
             res.status(201).json({

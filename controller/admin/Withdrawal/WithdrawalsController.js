@@ -149,16 +149,16 @@ const AdminWithdrawalAccept = async (req, res) => {
         const UserFind = await userModels.findOne(userQuery);
         TransactionsWithdrawal(UserWithdrawalFind);
         const Banlance = parseFloat(parseFloat(UserFind.balance) - parseFloat(UserWithdrawalFind.AmountWithVat))
-        // await userModels.findByIdAndUpdate(userQuery, { balance: Banlance }, option);
+        await userModels.findByIdAndUpdate(userQuery, { balance: Banlance }, option);
         
-        // const results = await WithdrawalModels.findByIdAndUpdate(query, { Status: 1 }, option);
+        const results = await WithdrawalModels.findByIdAndUpdate(query, { Status: 1 }, option);
 
-        // res.status(201).json({
-        //     success: true,
-        //     message: "Withdrawal Approve successfull",
-        //     data: results,
+        res.status(201).json({
+            success: true,
+            message: "Withdrawal Approve successfull",
+            data: results,
 
-        // });
+        });
 
 
     } catch (error) {

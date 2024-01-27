@@ -172,9 +172,13 @@ const AdminUseHistoryDetails = async (req, res) => {
 
 
 const AdminUserBalanceAdd = async (req, res) => {
-
+ 
     try {
         const data = req.body;
+        const query = { _id: new ObjectId(data.user_id) };
+        const option = { upsert: true };
+        const UserFind = await UserModels.findOne(query);
+
         const ExitsData = await TransactionsModels.findOne({ user_id: data.user_id }).sort('-created_at');
 
         function RandomTransaction(length) {
@@ -189,10 +193,13 @@ const AdminUserBalanceAdd = async (req, res) => {
             return result;
         }
 
+        const RemingBalanceSum = parseFloat(UserFind.balance) + parseFloat(data?.amount);
+
+        await UserModels.findByIdAndUpdate(query, { balance: RemingBalanceSum }, option);
 
         if (ExitsData === null) {
-
-            const StoreData = { user_id: data?.user_id, amount: data?.amount, post_balance: data?.amount, trx_type: '+', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: data?.amount, trx_type: '+', trx: RandomTransaction(15), remark: data?.remark }
+           
             const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
                 success: true,
@@ -200,7 +207,7 @@ const AdminUserBalanceAdd = async (req, res) => {
                 data: results,
             });
         } else {
-            const StoreData = { user_id: data?.user_id, amount: data?.amount, post_balance: (parseFloat(data?.amount) + parseFloat(ExitsData.post_balance)), trx_type: '+', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: (parseFloat(data?.amount) + parseFloat(ExitsData.post_balance)), trx_type: '+', trx: RandomTransaction(15), remark: data?.remark }
 
            const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
@@ -222,7 +229,10 @@ const AdminUserBalanceSubtract = async (req, res) => {
 
     try {
         const data = req.body;
-        const ExitsData = await TransactionsModels.findOne({ user_id: data.user_id }).sort('-created_at');
+        const query = { _id: new ObjectId(data.user_id) };
+        const option = { upsert: true };
+        const UserFind = await UserModels.findOne(query);
+   
         function RandomTransaction(length) {
             let result = '';
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -236,9 +246,14 @@ const AdminUserBalanceSubtract = async (req, res) => {
         }
 
 
+        const RemingBalanceSum = parseFloat(UserFind.balance) - parseFloat(data?.amount)
+        await UserModels.findByIdAndUpdate(query, { balance: RemingBalanceSum }, option);
+
+        const ExitsData = await TransactionsModels.findOne({ user_id: data.user_id }).sort('-created_at');
+        
         if (ExitsData === null) {
 
-            const StoreData = { user_id: data?.user_id, amount: data?.amount, post_balance: -parseFloat(data?.amount), trx_type: '-', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: -parseFloat(data?.amount), trx_type: '-', trx: RandomTransaction(15), remark: data?.remark }
             const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
                 success: true,
@@ -246,7 +261,7 @@ const AdminUserBalanceSubtract = async (req, res) => {
                 data: results,
             });
         } else {
-            const StoreData = { user_id: data?.user_id, amount: data?.amount, post_balance: parseFloat(parseFloat(ExitsData.post_balance) - parseFloat(data?.amount) ), trx_type: '-', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: parseFloat(parseFloat(ExitsData.post_balance) - parseFloat(data?.amount) ), trx_type: '-', trx: RandomTransaction(15), remark: data?.remark }
 
            const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({

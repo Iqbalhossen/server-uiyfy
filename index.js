@@ -41,6 +41,7 @@ const adminRoleRoute = require('./routes/admin/Admin/AdminRoutes');
 const adminUserTradeLogRoute = require('./routes/admin/User/userTradeLogRoutes');
 const adminUserTransactionsRoute = require('./routes/admin/Transactions/TransactionsRoutes');
 const adminSubscriberManagerRoutes = require('./routes/admin/SubscriberManager/SubscriberManagerRoutes');
+const adminSupportTicketsRoutes = require('./routes/admin/SupportTickets/SupportTicketsRoutes');
 
 
 ///////////// admin route 
@@ -60,6 +61,7 @@ app.use('/api/admin', adminRoleRoute);
 app.use('/api/admin/user/trade/log', adminUserTradeLogRoute);
 app.use('/api/admin/user/transactions', adminUserTransactionsRoute);
 app.use('/api/admin/subscriber/manager', adminSubscriberManagerRoutes);
+app.use('/api/admin/support/tickets', adminSupportTicketsRoutes);
 
 
 
@@ -81,6 +83,7 @@ const UserPracticeTradeLogRoute = require('./routes/user/PracticeTradeLog/Practi
 const UserDepositRoute = require('./routes/user/Deposit/DepositRoute');
 const UserWithdrawalRoute = require('./routes/user/Withdrawal/WithdrawalRoute');
 const UserNewsletterRoutes = require('./routes/user/Newsletter/NewsletterRoutes');
+const UserSupportTicketsRoutes = require('./routes/user/SupportTickets/SupportTicketsRoutes');
 
 
 ///////////// frontEnd route 
@@ -93,6 +96,7 @@ app.use('/api/user/Practice/trade/log', UserPracticeTradeLogRoute);
 app.use('/api/user/deposit', UserDepositRoute);
 app.use('/api/user/withdrawal', UserWithdrawalRoute);
 app.use('/api/user/subscribe', UserNewsletterRoutes);
+app.use('/api/user/support/tickets', UserSupportTicketsRoutes);
 
 
 

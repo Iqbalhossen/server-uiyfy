@@ -1,7 +1,4 @@
-const CryptoCurrencyModels = require('../../../models/CryptoCurrency/CryptoCurrencyModels');
-const ThradeSettingModels = require('../../../models/ThradeSetting/ThradeSettingModel');
-const TradeLogModels = require('../../../models/TradeLog/TradeLogModels');
-const DepositModels = require('../../../models/Deposit/DepositModels');
+const userModels = require('../../../models/userModels');
 const WithdrawalModels = require('../../../models/Withdrawal/WithdrawalModels');
 const WithdrawalMethodsModels = require('../../../models/WithdrawalMethods/WithdrawalMethodsModels');
 
@@ -56,64 +53,24 @@ const WithdrawalMethodView = async (req, res) => {
 const WithdrawalAmountCheck = async (req, res) => {
     try {
         const data = req.body;
-        /// Available Balance data
-        const DepositBalanceArraySum = await DepositModels.aggregate([
-            { $match: { Status: 1, user_id: data.user_id } },
-            { $group: { _id: {}, sum: { $sum: "$Amount" } } }
-        ]);
+    
+        
+ 
+        const Userquery = { _id: new ObjectId(data.user_id) };
 
-        const TradeLogWinBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: 'Win' } },
-            { $group: { _id: {}, sum: { $sum: "$Result_Amount" } } }
-        ]);
-
-        const TradeLogDrawBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: 'Draw' } },
-            { $group: { _id: {}, sum: { $sum: "$Result_Amount" } } }
-        ]);
-
-
-        const DepositBalanceSum = parseFloat(`${DepositBalanceArraySum[0] ? DepositBalanceArraySum[0].sum : 0}`);
-        const TradeLogWinBalanceSum = parseFloat(`${TradeLogWinBalanceArraySum[0] ? TradeLogWinBalanceArraySum[0].sum : 0}`);
-        const TradeLogDrawBalanceSum = parseFloat(`${TradeLogDrawBalanceArraySum[0] ? TradeLogDrawBalanceArraySum[0].sum : 0}`);
-
+        const UserFind = await userModels.findOne(Userquery);
 
         /// Minus Balance data 
-        const TradeLogLossBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: 'Loss' } },
-            { $group: { _id: {}, sum: { $sum: "$Amount" } } }
-        ]);
-
-        const TradeLogBalanceArraySum = await TradeLogModels.aggregate([
-            { $match: { user_id: data.user_id, Result: null } },
-            { $group: { _id: {}, sum: { $sum: "$Amount" } } }
-        ]);
-
         const WithdrawalPendingBalanceArraySum = await WithdrawalModels.aggregate([
-            { $match: { user_id: data.user_id, Status: 0 } },
+            { $match: { user_id: UserFind._id, Status: 0 } },
             { $group: { _id: {}, sum: { $sum: "$AmountWithVat" } } }
         ]);
-        const WithdrawalSuccessBalanceArraySum = await WithdrawalModels.aggregate([
-            { $match: { user_id: data.user_id, Status: 1 } },
-            { $group: { _id: {}, sum: { $sum: "$AmountWithVat" } } }
-        ]);
-
-        const TradeLogLossBalanceSum = parseFloat(`${TradeLogLossBalanceArraySum[0] ? TradeLogLossBalanceArraySum[0].sum : 0}`);
-
-        const TradeLogBalanceSum = parseFloat(`${TradeLogBalanceArraySum[0] ? TradeLogBalanceArraySum[0].sum : 0}`);
-
+     
         const WithdrawalPendingBalanceSum = parseFloat(`${WithdrawalPendingBalanceArraySum[0] ? WithdrawalPendingBalanceArraySum[0].sum : 0}`);
 
-        const WithdrawalSuccessBalanceSum = parseFloat(`${WithdrawalSuccessBalanceArraySum[0] ? WithdrawalSuccessBalanceArraySum[0].sum : 0}`);
-
-        /// Available Balance
-        const AvailableBalanceSum = DepositBalanceSum + TradeLogWinBalanceSum + TradeLogDrawBalanceSum;
-
-        /// Minus Balance
-        const MinusBalenceSum = TradeLogBalanceSum + TradeLogLossBalanceSum + WithdrawalPendingBalanceSum + WithdrawalSuccessBalanceSum + parseFloat(data?.Amount);
 
         /// Reming Available Balance
-        const RemingBalanceSum = AvailableBalanceSum - MinusBalenceSum;
+        const RemingBalanceSum = parseFloat(UserFind.balance) - parseFloat(data?.Amount) - parseFloat(WithdrawalPendingBalanceSum);
 
         const query = { _id: new ObjectId(data.MethodId) };
         const results = await WithdrawalMethodsModels.findOne(query);

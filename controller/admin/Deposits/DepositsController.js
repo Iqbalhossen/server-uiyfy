@@ -170,7 +170,6 @@ const AdminDepositRejectsum = async (req, res) => {
 
         // const results = await DepositModels.aggregate([{$group:{_id:{}, sum:{$sum:"$Amount"}}}]);
 
-        console.log(results[0].sum - pending[0].sum - reject[0]?.sum)
         res.status(201).json({
             success: true,
             message: "Deposts reject successfully",
