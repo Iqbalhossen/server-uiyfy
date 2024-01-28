@@ -42,6 +42,7 @@ const adminUserTradeLogRoute = require('./routes/admin/User/userTradeLogRoutes')
 const adminUserTransactionsRoute = require('./routes/admin/Transactions/TransactionsRoutes');
 const adminSubscriberManagerRoutes = require('./routes/admin/SubscriberManager/SubscriberManagerRoutes');
 const adminSupportTicketsRoutes = require('./routes/admin/SupportTickets/SupportTicketsRoutes');
+const adminReportRoutes = require('./routes/admin/Report/ReportRoutes');
 
 
 ///////////// admin route 
@@ -62,6 +63,7 @@ app.use('/api/admin/user/trade/log', adminUserTradeLogRoute);
 app.use('/api/admin/user/transactions', adminUserTransactionsRoute);
 app.use('/api/admin/subscriber/manager', adminSubscriberManagerRoutes);
 app.use('/api/admin/support/tickets', adminSupportTicketsRoutes);
+app.use('/api/admin/report', adminReportRoutes);
 
 
 

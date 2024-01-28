@@ -2,7 +2,7 @@ const WithdrawalMethodsModels = require('../../../models/WithdrawalMethods/Withd
 const WithdrawalModels = require('../../../models/Withdrawal/WithdrawalModels');
 const userModels = require('../../../models/userModels');
 const { ObjectId } = require('mongodb');
-const { TransactionsWithdrawal } = require('../../../commonfile/Transactions/Transactions')
+const { TransactionsWithdrawalReject } = require('../../../commonfile/Transactions/Transactions')
 
 const AdminWithdrawalMethodsView = async (req, res) => {
     try {
@@ -143,14 +143,7 @@ const AdminWithdrawalAccept = async (req, res) => {
         const old_id = req.params.id;
         const query = { _id: new ObjectId(old_id) };     
         const option = { upsert: true };
-
-        const UserWithdrawalFind = await WithdrawalModels.findOne(query);
-        const userQuery = { _id: new ObjectId(UserWithdrawalFind.user_id) };
-        const UserFind = await userModels.findOne(userQuery);
-        TransactionsWithdrawal(UserWithdrawalFind);
-        const Banlance = parseFloat(parseFloat(UserFind.balance) - parseFloat(UserWithdrawalFind.AmountWithVat))
-        await userModels.findByIdAndUpdate(userQuery, { balance: Banlance }, option);
-        
+   
         const results = await WithdrawalModels.findByIdAndUpdate(query, { Status: 1 }, option);
 
         res.status(201).json({
@@ -171,7 +164,13 @@ const AdminWithdrawalReject = async (req, res) => {
         const old_id = req.params.id;
         const query = { _id: new ObjectId(old_id) };
         const option = { upsert: true };
+
+        const UserWithdrawalFind = await WithdrawalModels.findOne(query);
+   
         const results = await WithdrawalModels.findByIdAndUpdate(query, { Status: 2 }, option);
+        if(results){
+            TransactionsWithdrawalReject(UserWithdrawalFind);
+        }
 
         res.status(201).json({
             success: true,

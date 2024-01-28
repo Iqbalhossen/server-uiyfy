@@ -10,16 +10,8 @@ const TradeLogStore = async (req, res) => {
         const data = req.body;
         const thradeSettingData = await ThradeSettingModels.findOne({ _id: new ObjectId(data.thradeSetting_id) });
 
-         const WithdrawalBalanceArraySum = await WithdrawalModels.aggregate([
-            { $match: { user_id: data.user_id, Status: '0' } },
-            { $group: { _id: {}, sum: { $sum: "$AmountWithVat" } } }
-        ]);
-
-        const WithdrawalBalanceSum = parseFloat(`${WithdrawalBalanceArraySum[0] ? WithdrawalBalanceArraySum[0].sum : 0}`);
-
         const UserData = await userModels.findOne({ _id: new ObjectId(data.user_id) });
-
-        const RemingBalanceSum = (parseFloat(UserData?.balance) - parseFloat(data?.amount) - parseFloat(WithdrawalBalanceSum));
+        const RemingBalanceSum = (parseFloat(UserData?.balance) - parseFloat(data?.amount));
 
         if (RemingBalanceSum >= 0) {
 

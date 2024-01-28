@@ -1,5 +1,6 @@
 const ManualGatewaysModels = require('../../../models/PaymentGateways/ManualGateways');
 const DepositModelsModels = require('../../../models/Deposit/DepositModels');
+const UserModels = require('../../../models/userModels');
 const sharp = require('sharp');
 const fs = require('fs');
 const { ObjectId } = require('mongodb');
@@ -43,6 +44,9 @@ const UserManualGatewaysDeposit = async (req, res) => {
         const FixedCharge = parseFloat(data.GatewayData.FixedCharge);
         const PercentCharge = parseFloat(data.GatewayData.PercentCharge);
 
+        const query = { _id: new ObjectId(data?.user_id) };
+        const FindUser = await UserModels.findOne(query);
+
         fs.access('./public/data/uploads/', (err) => {
             if (err) {
                 fs.mkdirSync('./public/data/uploads/')
@@ -69,6 +73,7 @@ const UserManualGatewaysDeposit = async (req, res) => {
         if (FixedCharge > 0 && PercentCharge <= 0) {
 
             const storeData = {
+                user_name: FindUser.name,
                 user_id: data.user_id,
                 GatewayName: data.GatewayData.GatewayName,
                 Transaction: RandomTransaction(15),
@@ -94,6 +99,7 @@ const UserManualGatewaysDeposit = async (req, res) => {
             const ChargeAmount = ((PercentCharge * userAmount ) / 100)
 
             const storeData = {
+                user_name: FindUser.name,
                 user_id: data.user_id,
                 GatewayName: data.GatewayData.GatewayName,
                 Transaction: RandomTransaction(15),
@@ -115,6 +121,7 @@ const UserManualGatewaysDeposit = async (req, res) => {
         } else {  ///// without charge area   ////////
 
             const storeData = {
+                user_name: FindUser.name,
                 user_id: data.user_id,
                 GatewayName: data.GatewayData.GatewayName,
                 Transaction: RandomTransaction(15),

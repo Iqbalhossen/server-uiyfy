@@ -1,7 +1,7 @@
 const TransactionsModels = require('../../models/Transactions/TransactionsModels');
 const userModels = require('../../models/userModels');
 const { ObjectId } = require('mongodb');
-
+ 
 const TransactionsDeposit = async (data) => {
 
     try {
@@ -18,12 +18,12 @@ const TransactionsDeposit = async (data) => {
         const ExitsData = await TransactionsModels.findOne().sort('-created_at');
 
         if (ExitsData === null) {
-            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: Amount, trx_type: '+', trx: Transaction, details: `Deposit Via ${GatewayName}`, }
+            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: Amount, trx_type: '+', trx: Transaction, details: `Deposit Via ${GatewayName}`, remark:'deposit' }
             await TransactionsModels.create(StoreData);
 
         } else {
 
-            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: (parseFloat(Amount) + parseFloat(ExitsData.post_balance)), trx_type: '+', trx: Transaction, details: `Deposit Via ${GatewayName}`, }
+            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: (parseFloat(Amount) + parseFloat(ExitsData.post_balance)), trx_type: '+', trx: Transaction, details: `Deposit Via ${GatewayName}`, remark:'deposit'}
             await TransactionsModels.create(StoreData);
 
         }
@@ -49,12 +49,55 @@ const TransactionsWithdrawal = async (data) => {
         const ExitsData = await TransactionsModels.findOne().sort('-created_at');
 
         if (ExitsData === null) {
-            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: -AmountWithVat, trx_type: '-', trx: Transaction, details: `Withdraw Via ${GatewayName}`, }
+            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: -AmountWithVat, trx_type: '-', trx: Transaction, details: `Withdraw Via ${GatewayName}`, remark:'withdrawal' }
             await TransactionsModels.create(StoreData);
 
         } else {
 
-            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: (parseFloat(ExitsData.post_balance) - parseFloat(AmountWithVat)), trx_type: '-', trx: Transaction, details: `Withdraw Via ${GatewayName}`, }
+            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: (parseFloat(AmountWithVat) - parseFloat(Amount)), post_balance: (parseFloat(ExitsData.post_balance) - parseFloat(AmountWithVat)), trx_type: '-', trx: Transaction, details: `Withdraw Via ${GatewayName}`, remark:'withdrawal'}
+            await TransactionsModels.create(StoreData);
+
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const TransactionsWithdrawalReject = async (data) => {
+
+    try {
+        const { user_id, Transaction, Amount, AmountWithVat } = data;
+        const query = { _id: new ObjectId(user_id) };
+        const option = { upsert: true };
+
+        
+        function RandomTransaction(length) {
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const charactersLength = characters.length;
+            let counter = 0;
+            while (counter < length) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                counter += 1;
+            }
+            return result;
+        }
+
+        const userFind = await userModels.findOne(query);
+
+        const userBalance = parseFloat(parseFloat(userFind.balance) + parseFloat(AmountWithVat)).toFixed(2);
+        await userModels.findByIdAndUpdate(query, { balance: userBalance }, option);
+
+        const ExitsData = await TransactionsModels.findOne().sort('-created_at');
+
+        if (ExitsData === null) {
+            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: 0, post_balance: AmountWithVat, trx_type: '+', trx: RandomTransaction(15), details: `${AmountWithVat} USD Refunded from withdrawal rejection`, remark:'withdraw_reject' }
+            await TransactionsModels.create(StoreData);
+
+        } else {
+
+            const StoreData = { user_name: userFind.name, user_id: userFind._id, amount: AmountWithVat, charge: 0, post_balance: (parseFloat(ExitsData.post_balance) + parseFloat(AmountWithVat)), trx_type: '+', trx: RandomTransaction(15), details: `${AmountWithVat} USD Refunded from withdrawal rejection`, remark:'withdraw_reject'}
             await TransactionsModels.create(StoreData);
 
         }
@@ -153,4 +196,4 @@ const TransactionsTradeLogResults = async (TradeData, userAmount, result) => {
 
 
 
-module.exports = { TransactionsDeposit, TransactionsWithdrawal, TransactionsTradeLog, TransactionsTradeLogResults, };
+module.exports = { TransactionsDeposit, TransactionsWithdrawal, TransactionsTradeLog, TransactionsTradeLogResults, TransactionsWithdrawalReject};

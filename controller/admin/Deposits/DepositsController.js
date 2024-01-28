@@ -122,7 +122,7 @@ const AdminDepositAcceptUpdate = async (req, res) => {
         const results = await DepositModels.findByIdAndUpdate(query, { Status: 1 }, option);
         res.status(201).json({
             success: true,
-            message: "Deposts accept successfully",
+            message: "Deposits accept successfully",
             data: results,
         });
 

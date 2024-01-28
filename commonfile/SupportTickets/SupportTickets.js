@@ -21,7 +21,7 @@ const SupportFileStore = async (data, file) => {
         const storeData = {
             support_message_id: data?._id,
             attachment: `public/data/uploads/${fileName}`,
-            created_at: new Date()
+            created_at: new Date().toLocaleString()
         }
         const resuls = await SupportAttachmentsModels.create(storeData);
     } catch (error) {

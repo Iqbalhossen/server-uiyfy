@@ -1,6 +1,7 @@
 const userModels = require('../../../models/userModels');
 const WithdrawalModels = require('../../../models/Withdrawal/WithdrawalModels');
 const WithdrawalMethodsModels = require('../../../models/WithdrawalMethods/WithdrawalMethodsModels');
+const {TransactionsWithdrawal} = require('../../../commonfile/Transactions/Transactions');
 
 const { ObjectId } = require('mongodb');
 
@@ -108,8 +109,8 @@ const WithdrawalAmountCheck = async (req, res) => {
 const WithdrawalStore = async (req, res) => {
     try {
         const data = req.body;
-        // console.log(data.WithdrawalAddress)
-        /// Available Balance data
+        const query = { _id: new ObjectId(data.GatewayData.data.user_id) };
+        const FindUser = await userModels.findOne(query);
 
         function RandomTransaction(length) {
             let result = '';
@@ -132,6 +133,7 @@ const WithdrawalStore = async (req, res) => {
             const ChargeAmount = (userAmount - parseFloat(FixedCharge))
 
             const storeData = {
+                user_name: FindUser?.name,
                 user_id: data.GatewayData.data.user_id,
                 GatewayName: data.GatewayData.data.data.Name,
                 Transaction: RandomTransaction(15),
@@ -144,8 +146,10 @@ const WithdrawalStore = async (req, res) => {
                 NetworkType: data.NetworkType,
                 Status: 0,
             } 
-            
             await WithdrawalModels.create(storeData);
+            if(results){
+                TransactionsWithdrawal(storeData);
+              }
             res.status(201).json({
                 success: true,
                 message: `Withdraw pending`,
@@ -156,6 +160,7 @@ const WithdrawalStore = async (req, res) => {
             const ChargeAmount = (userAmount - parseFloat((PercentCharge * userAmount) / 100));
 
             const storeData = {
+                user_name: FindUser?.name,
                 user_id: data.GatewayData.data.user_id,
                 GatewayName: data.GatewayData.data.data.Name,
                 Transaction: RandomTransaction(15),
@@ -168,16 +173,21 @@ const WithdrawalStore = async (req, res) => {
                 NetworkType: data.NetworkType,
                 Status: 0,
             }
-            await WithdrawalModels.create(storeData);
+            
+          const results =  await WithdrawalModels.create(storeData);
+          if(results){
+            TransactionsWithdrawal(storeData);
+          }
             res.status(201).json({
                 success: true,
-                message: `WithDraw pending`,
+                message: `Withdraw pending`,
                 data: storeData,
             });
 
         } else {
 
             const storeData = {
+                user_name: FindUser?.name,
                 user_id: data.GatewayData.data.user_id,
                 GatewayName: data.GatewayData.data.data.Name,
                 Transaction: RandomTransaction(15),
@@ -189,9 +199,11 @@ const WithdrawalStore = async (req, res) => {
                 WithdrawalAddress: data.WithdrawalAddress,
                 NetworkType: data.NetworkType,
                 Status: 0,
-            }
-
+            }           
             await WithdrawalModels.create(storeData);
+            if(results){
+                TransactionsWithdrawal(storeData);
+              }
             res.status(201).json({
                 success: true,
                 message: `WithDraw pending`,

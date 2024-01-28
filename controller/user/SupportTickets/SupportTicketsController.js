@@ -93,9 +93,13 @@ const UserSupportTicketsReplay = async (req, res) => {
         const option = { upsert: true };
 
         const findSupportMessages = await SupportMessagesModels.findOne({support_ticket_id:id}).sort('-created_at');
+        const findSupportTickets = await SupportTicketsModels.findOne(query).sort('-created_at');
 
-        if(findSupportMessages?.admin_id !== null){
+        if(findSupportMessages?.admin_id !== null && findSupportTickets.status !== 3){
               await SupportTicketsModels.findByIdAndUpdate(query, { status: 2 }, option);
+        }
+        if( findSupportTickets.status === 3){
+              await SupportTicketsModels.findByIdAndUpdate(query, { status: 0 }, option);
         }
         SupportMessagesStore(data, id, req.file);
 

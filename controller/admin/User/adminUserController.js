@@ -198,7 +198,7 @@ const AdminUserBalanceAdd = async (req, res) => {
         await UserModels.findByIdAndUpdate(query, { balance: RemingBalanceSum }, option);
 
         if (ExitsData === null) {
-            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: data?.amount, trx_type: '+', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: data?.amount, trx_type: '+', trx: RandomTransaction(15), details: data?.remark, remark:'balance_add' }
            
             const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
@@ -207,7 +207,7 @@ const AdminUserBalanceAdd = async (req, res) => {
                 data: results,
             });
         } else {
-            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: (parseFloat(data?.amount) + parseFloat(ExitsData.post_balance)), trx_type: '+', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: (parseFloat(data?.amount) + parseFloat(ExitsData.post_balance)), trx_type: '+', trx: RandomTransaction(15), details: data?.remark, remark:'balance_add' }
 
            const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
@@ -244,8 +244,6 @@ const AdminUserBalanceSubtract = async (req, res) => {
             }
             return result;
         }
-
-
         const RemingBalanceSum = parseFloat(UserFind.balance) - parseFloat(data?.amount)
         await UserModels.findByIdAndUpdate(query, { balance: RemingBalanceSum }, option);
 
@@ -253,7 +251,7 @@ const AdminUserBalanceSubtract = async (req, res) => {
         
         if (ExitsData === null) {
 
-            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: -parseFloat(data?.amount), trx_type: '-', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: -parseFloat(data?.amount), trx_type: '-', trx: RandomTransaction(15), details: details?.remark, remark:'balance_subtract' }
             const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
                 success: true,
@@ -261,7 +259,7 @@ const AdminUserBalanceSubtract = async (req, res) => {
                 data: results,
             });
         } else {
-            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: parseFloat(parseFloat(ExitsData.post_balance) - parseFloat(data?.amount) ), trx_type: '-', trx: RandomTransaction(15), remark: data?.remark }
+            const StoreData = {user_name: UserFind?.name, user_id: data?.user_id, amount: data?.amount, post_balance: parseFloat(parseFloat(ExitsData.post_balance) - parseFloat(data?.amount) ), trx_type: '-', trx: RandomTransaction(15), details: data?.remark, remark:'balance_subtract' }
 
            const results =  await TransactionsModels.create(StoreData);
             res.status(201).json({
