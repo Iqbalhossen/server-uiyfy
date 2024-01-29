@@ -212,7 +212,7 @@ const AdminLogin = async (req, res) => {
 
                 res.status(201).json({
                     success: true,
-                    message: "Login successful",
+                    // message: "Login successful",
                     data: AdminData,
                     token: token,
                 });

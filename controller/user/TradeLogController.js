@@ -125,7 +125,6 @@ const TradeLogSingleView = async (req, res) => {
         const { id } = req.params;
         const query = { _id: new ObjectId(id) };      
         const data = await TradeLogModels.findOne(query)
-console.log(data)
         res.status(201).json({
             success: true,
             data,
