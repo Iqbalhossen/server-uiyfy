@@ -171,7 +171,7 @@ const UserSignupPassword = async (req, res) => {
 const UserLogin = async (req, res) => {
     try {
         const data = req.body;
-
+        console.log(data)
         if (data.password === undefined && data.email === undefined) {
             return res.status(400).json({
                 success: false,

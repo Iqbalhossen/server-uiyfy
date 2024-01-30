@@ -47,7 +47,7 @@ const PracticeTradeLogStore = async (req, res) => {
                    const results = await PracticeTradeLogModels.create(storeData);
                     res.status(201).json({
                         success: true,
-                        message: `Practice Thrade ${data?.HighLow}`,
+                        message: `Practice Trade ${data?.HighLow}`,
                         data: results,
                     });
     

@@ -3,7 +3,7 @@ const route = express.Router();
 
 const {UserSignup, UserSignupVerify, UserSignupPassword, UserLogin, UserLoginForm , UserLoginPassword, UserPasswordForGet, UserPasswordReset} = require('./../../controller/user/userAuthenticationController');
 const {userEmailVerifyToken } = require('../../middlewares/userEmailVerifyToken');
-
+ 
 route.post('/signup/email',  UserSignup);
 route.post('/signup/email/verify', userEmailVerifyToken, UserSignupVerify);
 route.post('/signup', UserSignupPassword);

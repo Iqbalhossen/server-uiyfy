@@ -48,7 +48,7 @@ const TradeLogStore = async (req, res) => {
               const results =   await TradeLogModels.create(storeData);
                 res.status(201).json({
                     success: true,
-                    message: `Thrade ${data?.HighLow}`,
+                    message: `Trade ${data?.HighLow}`,
                     data: results,
                 });
     

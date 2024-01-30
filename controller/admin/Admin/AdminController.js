@@ -138,6 +138,38 @@ const AdminDashboardView = async (req, res) => {
         const PendingWithdrawal = await WithdrawalModels.find({ Status: 0 });
         const RejectWithdrawal = await WithdrawalModels.find({ Status: 2 });
 
+
+
+        const WithdrawalChart = await WithdrawalModels.aggregate([
+            { $match: { Status: 1 } },
+            {
+              $group: {
+                _id: {
+                  month: { $month: '$Created_At' },
+                  year: { $year: '$Created_At' }
+                },
+                sum: { $sum: "$AmountWithVat" }
+              }
+            },
+            { $sort: { sum: -1, '_id.year': -1, '_id.month': -1 } },
+            
+          ])
+
+        const DepositChart = await DepositModels.aggregate([
+            { $match: { Status: 1 } },
+            {
+              $group: {
+                _id: {
+                  month: { $month: '$Created_At' },
+                  year: { $year: '$Created_At' }
+                },
+                sum: { $sum: "$AmountWithVat" }
+              }
+            },
+            { $sort: { sum: -1, '_id.year': -1, '_id.month': -1 } },
+            
+          ])
+
         res.status(201).json({
             success: true,
             TotalUser: TotalUser.length,
@@ -153,7 +185,9 @@ const AdminDashboardView = async (req, res) => {
             RejectDeposit: RejectDeposit.length,
             WithdrawalAcceptSum,
             PendingWithdrawal: PendingWithdrawal.length,
-            TotalTrade: RejectWithdrawal.length,
+            RejectWithdrawal: RejectWithdrawal.length,
+            DepositChart,
+            WithdrawalChart,
         });
 
 
